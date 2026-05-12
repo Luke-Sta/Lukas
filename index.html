@@ -22,28 +22,42 @@
             </div>
             <div class="stat-card">
                 <h3>Sistem Terdeteksi</h3>
-                <p class="count">Ring 3 Script</p>
+                <p class="count">Multi-Sistem</p>
             </div>
         </section>
+        
+        <div class="controls-container">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Cari Nickname Cheater..." onkeyup="filterPlayer()">
+            </div>
+
+            <div class="filter-container">
+                <select id="categoryFilter" onchange="filterPlayer()">
+                    <option value="all">Semua Kategori</option>
+                    <option value="makro">Makro (Ring 3)</option>
+                    <option value="cheat">Cheat (External/Kernel)</option>
+                </select>
+            </div>
+        </div>
 
         <section class="database">
             <h2>Daftar Analisis Terbaru</h2>
 
-             <div class="report-card">
+            <div class="report-card" data-category="cheat">
                 <div class="card-header">
                     <span class="danger-tag">HIGH RISK</span>
                     <h3>Nickname: T77GHOIB_477</h3>
                 </div>
                 <div class="card-body">
-                    <p><strong>Jenis:</strong> Menyelam </p>
-                    <p><strong>Analisis:</strong> Menggunakan Jenis Vip Yang berasl dari Sumatra Cit, player mengaktifkan bagian up/down yang memungkinkan pemain dapat menembus sitem lantai di dalam game</p>
+                    <p><strong>Jenis:</strong> Menyelam</p>
+                    <p><strong>Analisis:</strong> Menggunakan Jenis VIP yang memiliki bypass setara Cheat Blocker. Mengaktifkan fitur up/down yang memungkinkan pemain menembus sistem lantai game.</p>
                 </div>
                 <div class="card-footer">
                     <span>Status: Monitoring</span>
                 </div>
             </div>
             
-            <div class="report-card">
+            <div class="report-card" data-category="makro">
                 <div class="card-header">
                     <span class="danger-tag">HIGH RISK</span>
                     <h3>Nickname: T77GHOIB_432</h3>
@@ -57,7 +71,7 @@
                 </div>
             </div>
 
-            <div class="report-card">
+            <div class="report-card" data-category="cheat">
                 <div class="card-header">
                     <span class="warning-tag">MEDIUM</span>
                     <h3>Nickname: AimBotLover</h3>
@@ -76,5 +90,27 @@
     <footer>
         <p>&copy; 2026 Lukas P. Nainggolan | Proyek Analisis Bisnis Digital</p>
     </footer>
+
+    <script>
+    function filterPlayer() {
+        let input = document.getElementById('searchInput').value.toLowerCase();
+        let category = document.getElementById('categoryFilter').value;
+        let cards = document.getElementsByClassName('report-card');
+
+        for (let i = 0; i < cards.length; i++) {
+            let nickname = cards[i].getElementsByTagName('h3')[0].innerText.toLowerCase();
+            let cardCategory = cards[i].getAttribute('data-category');
+
+            let matchName = nickname.includes(input);
+            let matchCategory = (category === "all" || cardCategory === category);
+
+            if (matchName && matchCategory) {
+                cards[i].style.display = "";
+            } else {
+                cards[i].style.display = "none";
+            }
+        }
+    }
+    </script>
 </body>
 </html>

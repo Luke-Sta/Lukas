@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Admin | PB Hunter</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        button { 
+    background: #ff4b2b; 
+    color: white; 
+    padding: 12px; 
+    width: 100%; 
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-weight: bold;
+    /* Ini rahasianya biar smooth */
+    transition: all 0.3s ease; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* 1. Efek saat kursor menyentuh (Glow & Nyala) */
+button:hover { 
+    background: #ff310d;
+    transform: translateY(-2px); /* Tombol kayak agak naik sedikit */
+    box-shadow: 0 0 20px rgba(255, 75, 43, 0.7); /* Efek cahaya menyala */
+}
+
+/* 2. Efek saat tombol beneran DIKLIK (Efek Membal) */
+button:active { 
+    transform: translateY(1px); /* Tombol masuk ke dalam pas diklik */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    filter: brightness(0.8); /* Warna agak gelap dikit pas ditekan */
+}
+        /* Efek buat tombol Logout atau tombol pendukung lainnya */
+.btn-logout, .btn-secondary { 
+    background: #444; 
+    color: white; 
+    padding: 10px; 
+    width: 100%; 
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    margin-top: 10px;
+    transition: 0.3s; /* Biar animasinya halus */
+}
+
+.btn-logout:hover { 
+    background: #666; 
+    transform: scale(1.02); /* Biar ada efek "membal" sedikit */
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+}
+        .login-box { background: #1e1e1e; padding: 40px; border-radius: 12px; margin-top: 100px; text-align: center; border: 1px solid #333; }
+        input { width: 100%; margin: 10px 0; padding: 12px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 8px; }
+        button { background: #ff4b2b; color: white; padding: 12px; width: 100%; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-box">
+            <h2>ADMIN <span class="highlight">LOGIN</span></h2>
+            <input type="email" id="email" placeholder="Email Admin...">
+            <input type="password" id="pass" placeholder="Password...">
+            <button onclick="login()">MASUK SISTEM</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAtwMIddFawOjoeaxxjOwnbJF_6Z-h91T4",
+            authDomain: "pb-hunter-lukas.firebaseapp.com",
+            projectId: "pb-hunter-lukas",
+            storageBucket: "pb-hunter-lukas.firebasestorage.app",
+            messagingSenderId: "879661325305",
+            appId: "1:879661325305:web:ff3288dd77095753b13b28"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        function login() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+
+            auth.signInWithEmailAndPassword(email, pass)
+            .then(() => {
+                window.location.href = "admin.html"; // Berhasil, pindah ke admin
+            })
+            .catch((error) => {
+                alert("Login Gagal! Cek email/password.");
+            });
+        }
+
+        // Kalau lagi di input password terus tekan Enter, langsung login
+document.getElementById('pass').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+        login();
+    }
+});
+    </script>
+</body>
+</html>

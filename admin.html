@@ -6,19 +6,74 @@
     <title>Admin Panel | PB Hunter</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        button { 
+    background: #ff4b2b; 
+    color: white; 
+    padding: 12px; 
+    width: 100%; 
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-weight: bold;
+    /* Ini rahasianya biar smooth */
+    transition: all 0.3s ease; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* 1. Efek saat kursor menyentuh (Glow & Nyala) */
+button:hover { 
+    background: #ff310d;
+    transform: translateY(-2px); /* Tombol kayak agak naik sedikit */
+    box-shadow: 0 0 20px rgba(255, 75, 43, 0.7); /* Efek cahaya menyala */
+}
+
+/* 2. Efek saat tombol beneran DIKLIK (Efek Membal) */
+button:active { 
+    transform: translateY(1px); /* Tombol masuk ke dalam pas diklik */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    filter: brightness(0.8); /* Warna agak gelap dikit pas ditekan */
+}
+        
+        /* Efek buat tombol Logout atau tombol pendukung lainnya */
+.btn-logout, .btn-secondary { 
+    background: #444; 
+    color: white; 
+    padding: 10px; 
+    width: 100%; 
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    margin-top: 10px;
+    transition: 0.3s; /* Biar animasinya halus */
+}
+
+.btn-logout:hover { 
+    background: #666; 
+    transform: scale(1.02); /* Biar ada efek "membal" sedikit */
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+}
         .form-admin { background: #1e1e1e; padding: 30px; border-radius: 12px; margin-top: 50px; border: 1px solid #333; }
         input, select, textarea { 
             width: 100%; margin: 10px 0; padding: 12px; 
             background: #2a2a2a; border: 1px solid #444; 
             color: white; border-radius: 8px; outline: none;
         }
-        button { 
-            background: #ff4b2b; color: white; padding: 15px; 
-            width: 100%; border: none; border-radius: 8px; 
-            cursor: pointer; font-weight: bold; margin-top: 10px;
-            transition: 0.3s;
-        }
-        button:hover { background: #ff310d; transform: scale(1.02); }
+        .btn-kirim { background: #ff4b2b; color: white; padding: 15px; width: 100%; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
+        .btn-logout { background: #ee0000; color: white; padding: 15px; width: 100%; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+        .btn-kirim:hover { background: #ff310d; transform: scale(1.02); }
+        textarea { 
+    width: 100%; 
+    margin: 10px 0; 
+    padding: 12px; 
+    background: #2a2a2a; 
+    border: 1px solid #444; 
+    color: white; 
+    border-radius: 8px; 
+    outline: none;
+    
+    resize: none;          /* Menghilangkan pojok penarik kotak */
+    overflow-y: auto;      /* Otomatis muncul scrollbar kalau teks kepanjangan */
+}
     </style>
 </head>
 <body>
@@ -32,16 +87,18 @@
                 <option value="cheat">Cheat (External/Kernel)</option>
             </select>
             <textarea id="analisis" placeholder="Tuliskan hasil analisis sistem di sini..."></textarea>
-            <button onclick="simpanData()">KIRIM KE CLOUD DATABASE</button>
+            
+            <button class="btn-kirim" onclick="simpanData()">KIRIM KE CLOUD DATABASE</button>
+            <button class="btn-logout" onclick="logout()">LOGOUT SYSTEM</button>
         </div>
         <p style="text-align: center; margin-top: 20px;"><a href="index.html" style="color: #888;">Kembali ke Dashboard Utama</a></p>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
 
     <script>
-        // Pakai Config asli punya Lukas
         const firebaseConfig = {
             apiKey: "AIzaSyAtwMIddFawOjoeaxxjOwnbJF_6Z-h91T4",
             authDomain: "pb-hunter-lukas.firebaseapp.com",
@@ -53,9 +110,22 @@
             databaseURL: "https://pb-hunter-lukas-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
 
-        // Inisialisasi Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        const auth = firebase.auth();
+
+        // CEK LOGIN: Kalau tidak ada user, tendang ke login.html
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = "login.html";
+            }
+        });
+
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = "login.html";
+            });
+        }
 
         function simpanData() {
             const nickname = document.getElementById('nick').value;
@@ -68,7 +138,6 @@
                 return;
             }
 
-            // Simpan ke folder 'laporan' di Firebase
             const databaseRef = database.ref('laporan');
             const dataBaru = databaseRef.push();
             
@@ -80,15 +149,22 @@
                 timestamp: Date.now()
             }).then(() => {
                 alert("Mantap! Data berhasil terbang ke Cloud!");
-                // Kosongkan form
                 document.getElementById('nick').value = "";
                 document.getElementById('jenis').value = "";
                 document.getElementById('analisis').value = "";
             }).catch((error) => {
-                alert("Aduh gagal, coba cek koneksi atau Test Mode Firebase");
+                alert("Gagal kirim data!");
                 console.error(error);
             });
         }
+
+        // Kalau lagi di textarea terus tekan Enter, langsung kirim
+document.getElementById('analisis').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) { // Shift+Enter buat baris baru, Enter doang buat kirim
+        e.preventDefault(); // Biar gak nambah baris baru di textarea
+        simpanData();
+    }
+});
     </script>
 </body>
 </html>

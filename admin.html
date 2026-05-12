@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | PB Hunter</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .form-admin { background: #1e1e1e; padding: 30px; border-radius: 12px; margin-top: 50px; border: 1px solid #333; }
+        input, select, textarea { 
+            width: 100%; margin: 10px 0; padding: 12px; 
+            background: #2a2a2a; border: 1px solid #444; 
+            color: white; border-radius: 8px; outline: none;
+        }
+        button { 
+            background: #ff4b2b; color: white; padding: 15px; 
+            width: 100%; border: none; border-radius: 8px; 
+            cursor: pointer; font-weight: bold; margin-top: 10px;
+            transition: 0.3s;
+        }
+        button:hover { background: #ff310d; transform: scale(1.02); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-admin">
+            <h2 style="text-align: center; margin-bottom: 20px;">Input Data Cheater Baru</h2>
+            <input type="text" id="nick" placeholder="Nickname Cheater...">
+            <input type="text" id="jenis" placeholder="Jenis (Contoh: No Recoil, Wallhack)">
+            <select id="kat">
+                <option value="makro">Makro (Ring 3)</option>
+                <option value="cheat">Cheat (External/Kernel)</option>
+            </select>
+            <textarea id="analisis" placeholder="Tuliskan hasil analisis sistem di sini..."></textarea>
+            <button onclick="simpanData()">KIRIM KE CLOUD DATABASE</button>
+        </div>
+        <p style="text-align: center; margin-top: 20px;"><a href="index.html" style="color: #888;">Kembali ke Dashboard Utama</a></p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
+    <script>
+        // Pakai Config asli punya Lukas
+        const firebaseConfig = {
+            apiKey: "AIzaSyAtwMIddFawOjoeaxxjOwnbJF_6Z-h91T4",
+            authDomain: "pb-hunter-lukas.firebaseapp.com",
+            projectId: "pb-hunter-lukas",
+            storageBucket: "pb-hunter-lukas.firebasestorage.app",
+            messagingSenderId: "879661325305",
+            appId: "1:879661325305:web:ff3288dd77095753b13b28",
+            measurementId: "G-W2965QYNWM",
+            databaseURL: "https://pb-hunter-lukas-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+
+        // Inisialisasi Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        function simpanData() {
+            const nickname = document.getElementById('nick').value;
+            const jenis = document.getElementById('jenis').value;
+            const kategori = document.getElementById('kat').value;
+            const analisis = document.getElementById('analisis').value;
+
+            if(nickname == "" || jenis == "") {
+                alert("Woi Kas, nick sama jenis jangan kosong!");
+                return;
+            }
+
+            // Simpan ke folder 'laporan' di Firebase
+            const databaseRef = database.ref('laporan');
+            const dataBaru = databaseRef.push();
+            
+            dataBaru.set({
+                nickname: nickname,
+                jenis: jenis,
+                kategori: kategori,
+                analisis: analisis,
+                timestamp: Date.now()
+            }).then(() => {
+                alert("Mantap! Data berhasil terbang ke Cloud!");
+                // Kosongkan form
+                document.getElementById('nick').value = "";
+                document.getElementById('jenis').value = "";
+                document.getElementById('analisis').value = "";
+            }).catch((error) => {
+                alert("Aduh gagal, coba cek koneksi atau Test Mode Firebase");
+                console.error(error);
+            });
+        }
+    </script>
+</body>
+</html>

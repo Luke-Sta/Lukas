@@ -6,74 +6,18 @@
     <title>Admin Panel | PB Hunter</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        button { 
-    background: #ff4b2b; 
-    color: white; 
-    padding: 12px; 
-    width: 100%; 
-    border: none; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    font-weight: bold;
-    /* Ini rahasianya biar smooth */
-    transition: all 0.3s ease; 
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-}
-
-/* 1. Efek saat kursor menyentuh (Glow & Nyala) */
-button:hover { 
-    background: #ff310d;
-    transform: translateY(-2px); /* Tombol kayak agak naik sedikit */
-    box-shadow: 0 0 20px rgba(255, 75, 43, 0.7); /* Efek cahaya menyala */
-}
-
-/* 2. Efek saat tombol beneran DIKLIK (Efek Membal) */
-button:active { 
-    transform: translateY(1px); /* Tombol masuk ke dalam pas diklik */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    filter: brightness(0.8); /* Warna agak gelap dikit pas ditekan */
-}
-        
-        /* Efek buat tombol Logout atau tombol pendukung lainnya */
-.btn-logout, .btn-secondary { 
-    background: #444; 
-    color: white; 
-    padding: 10px; 
-    width: 100%; 
-    border: none; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    margin-top: 10px;
-    transition: 0.3s; /* Biar animasinya halus */
-}
-
-.btn-logout:hover { 
-    background: #666; 
-    transform: scale(1.02); /* Biar ada efek "membal" sedikit */
-    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
-}
         .form-admin { background: #1e1e1e; padding: 30px; border-radius: 12px; margin-top: 50px; border: 1px solid #333; }
         input, select, textarea { 
             width: 100%; margin: 10px 0; padding: 12px; 
             background: #2a2a2a; border: 1px solid #444; 
-            color: white; border-radius: 8px; outline: none;
+            color: white; border-radius: 8px; outline: none; transition: 0.3s;
         }
-        .btn-kirim { background: #ff4b2b; color: white; padding: 15px; width: 100%; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
-        .btn-logout { background: #ee0000; color: white; padding: 15px; width: 100%; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
-        .btn-kirim:hover { background: #ff310d; transform: scale(1.02); }
-        textarea { 
-    width: 100%; 
-    margin: 10px 0; 
-    padding: 12px; 
-    background: #2a2a2a; 
-    border: 1px solid #444; 
-    color: white; 
-    border-radius: 8px; 
-    outline: none;
-    
-    resize: none;          /* Menghilangkan pojok penarik kotak */
-    overflow-y: auto;      /* Otomatis muncul scrollbar kalau teks kepanjangan */
-}
+        input:focus, textarea:focus { border-color: #ff4b2b; }
+        .btn-kirim { background: #ff4b2b; color: white; padding: 15px; width: 100%; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .btn-kirim:hover { background: #ff310d; transform: translateY(-2px); box-shadow: 0 0 20px rgba(255, 75, 43, 0.7); }
+        .btn-logout { background: #444; color: white; padding: 15px; width: 100%; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn-logout:hover { background: #666; transform: scale(1.02); }
+        textarea { resize: none; overflow-y: auto; height: 120px; }
     </style>
 </head>
 <body>
@@ -86,6 +30,7 @@ button:active {
                 <option value="makro">Makro (Ring 3)</option>
                 <option value="cheat">Cheat (External/Kernel)</option>
             </select>
+            <input type="text" id="linkFoto" placeholder="Link Foto Bukti (Contoh: https://i.ibb.co/xxx.png)">
             <textarea id="analisis" placeholder="Tuliskan hasil analisis sistem di sini..."></textarea>
             
             <button class="btn-kirim" onclick="simpanData()">KIRIM KE CLOUD DATABASE</button>
@@ -114,57 +59,35 @@ button:active {
         const database = firebase.database();
         const auth = firebase.auth();
 
-        // CEK LOGIN: Kalau tidak ada user, tendang ke login.html
-        auth.onAuthStateChanged((user) => {
-            if (!user) {
-                window.location.href = "login.html";
-            }
-        });
+        auth.onAuthStateChanged((user) => { if (!user) window.location.href = "login.html"; });
 
-        function logout() {
-            auth.signOut().then(() => {
-                window.location.href = "login.html";
-            });
-        }
+        function logout() { auth.signOut().then(() => { window.location.href = "login.html"; }); }
 
         function simpanData() {
             const nickname = document.getElementById('nick').value;
             const jenis = document.getElementById('jenis').value;
             const kategori = document.getElementById('kat').value;
+            const linkFoto = document.getElementById('linkFoto').value;
             const analisis = document.getElementById('analisis').value;
 
-            if(nickname == "" || jenis == "") {
-                alert("Woi Kas, nick sama jenis jangan kosong!");
-                return;
-            }
+            if(nickname == "" || jenis == "") { alert("Woi Kas, nick sama jenis jangan kosong!"); return; }
 
             const databaseRef = database.ref('laporan');
-            const dataBaru = databaseRef.push();
-            
-            dataBaru.set({
-                nickname: nickname,
-                jenis: jenis,
-                kategori: kategori,
-                analisis: analisis,
-                timestamp: Date.now()
+            databaseRef.push().set({
+                nickname: nickname, jenis: jenis, kategori: kategori,
+                foto: linkFoto, analisis: analisis, timestamp: Date.now()
             }).then(() => {
-                alert("Mantap! Data berhasil terbang ke Cloud!");
+                alert("Data & Foto berhasil sinkron ke Cloud!");
                 document.getElementById('nick').value = "";
                 document.getElementById('jenis').value = "";
+                document.getElementById('linkFoto').value = "";
                 document.getElementById('analisis').value = "";
-            }).catch((error) => {
-                alert("Gagal kirim data!");
-                console.error(error);
             });
         }
 
-        // Kalau lagi di textarea terus tekan Enter, langsung kirim
-document.getElementById('analisis').addEventListener('keypress', function (e) {
-    if (e.key === 'Enter' && !e.shiftKey) { // Shift+Enter buat baris baru, Enter doang buat kirim
-        e.preventDefault(); // Biar gak nambah baris baru di textarea
-        simpanData();
-    }
-});
+        document.getElementById('analisis').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); simpanData(); }
+        });
     </script>
 </body>
 </html>

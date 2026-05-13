@@ -3,45 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel | PB Hunter</title>
+    <title>PB FairPlay Analyst | Database Hunter</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .form-admin { background: #1e1e1e; padding: 30px; border-radius: 12px; margin-top: 50px; border: 1px solid #333; }
-        input, select, textarea { 
-            width: 100%; margin: 10px 0; padding: 12px; 
-            background: #2a2a2a; border: 1px solid #444; 
-            color: white; border-radius: 8px; outline: none; transition: 0.3s;
+        .report-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #333;
+            display: block;
+            object-fit: cover;
+            max-height: 250px;
         }
-        input:focus, textarea:focus { border-color: #ff4b2b; }
-        .btn-kirim { background: #ff4b2b; color: white; padding: 15px; width: 100%; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .btn-kirim:hover { background: #ff310d; transform: translateY(-2px); box-shadow: 0 0 20px rgba(255, 75, 43, 0.7); }
-        .btn-logout { background: #444; color: white; padding: 15px; width: 100%; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        .btn-logout:hover { background: #666; transform: scale(1.02); }
-        textarea { resize: none; overflow-y: auto; height: 120px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="form-admin">
-            <h2 style="text-align: center; margin-bottom: 20px;">Input Data Cheater Baru</h2>
-            <input type="text" id="nick" placeholder="Nickname Cheater...">
-            <input type="text" id="jenis" placeholder="Jenis (Contoh: No Recoil, Wallhack)">
-            <select id="kat">
-                <option value="makro">Makro (Ring 3)</option>
-                <option value="cheat">Cheat (External/Kernel)</option>
-            </select>
-            <input type="text" id="linkFoto" placeholder="Link Foto Bukti (Contoh: https://i.ibb.co/xxx.png)">
-            <textarea id="analisis" placeholder="Tuliskan hasil analisis sistem di sini..."></textarea>
-            
-            <button class="btn-kirim" onclick="simpanData()">KIRIM KE CLOUD DATABASE</button>
-            <button class="btn-logout" onclick="logout()">LOGOUT SYSTEM</button>
+    <header>
+        <div class="container">
+            <h1>PORTAL <span class="highlight">HUNTER</span></h1>
+            <p>Database Analisis Sistem & Perilaku Tidak Wajar</p>
         </div>
-        <p style="text-align: center; margin-top: 20px;"><a href="index.html" style="color: #888;">Kembali ke Dashboard Utama</a></p>
-    </div>
+    </header>
+
+    <main class="container">
+        <section class="stats">
+            <div class="stat-card">
+                <h3>Total Laporan</h3>
+                <p class="count" id="totalLaporan">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Sistem Terdeteksi</h3>
+                <p class="count">Multi-Sistem</p>
+            </div>
+        </section>
+        
+        <div class="controls-container">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Cari Nickname Cheater..." onkeyup="filterPlayer()">
+            </div>
+
+            <div class="filter-container">
+                <select id="categoryFilter" onchange="filterPlayer()">
+                    <option value="all">Semua Kategori</option>
+                    <option value="makro">Makro (Ring 3)</option>
+                    <option value="cheat">Cheat (External/Kernel)</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="reportContainer" class="report-grid">
+            </div>
+    </main>
 
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
 
     <script>
         const firebaseConfig = {
@@ -57,37 +73,53 @@
 
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const auth = firebase.auth();
 
-        auth.onAuthStateChanged((user) => { if (!user) window.location.href = "login.html"; });
+        database.ref('laporan').on('value', (snapshot) => {
+            const container = document.getElementById('reportContainer');
+            container.innerHTML = ""; 
+            let total = 0;
 
-        function logout() { auth.signOut().then(() => { window.location.href = "login.html"; }); }
+            snapshot.forEach((childSnapshot) => {
+                const item = childSnapshot.val();
+                total++;
 
-        function simpanData() {
-            const nickname = document.getElementById('nick').value;
-            const jenis = document.getElementById('jenis').value;
-            const kategori = document.getElementById('kat').value;
-            const linkFoto = document.getElementById('linkFoto').value;
-            const analisis = document.getElementById('analisis').value;
-
-            if(nickname == "" || jenis == "") { alert("Woi Kas, nick sama jenis jangan kosong!"); return; }
-
-            const databaseRef = database.ref('laporan');
-            databaseRef.push().set({
-                nickname: nickname, jenis: jenis, kategori: kategori,
-                foto: linkFoto, analisis: analisis, timestamp: Date.now()
-            }).then(() => {
-                alert("Data & Foto berhasil sinkron ke Cloud!");
-                document.getElementById('nick').value = "";
-                document.getElementById('jenis').value = "";
-                document.getElementById('linkFoto').value = "";
-                document.getElementById('analisis').value = "";
+                const card = `
+                    <div class="report-card" data-category="${item.kategori}">
+                        <div class="card-header">
+                            <span class="${item.kategori === 'cheat' ? 'danger-tag' : 'warning-tag'}">
+                                ${item.kategori.toUpperCase()}
+                            </span>
+                            <h3>Nickname: ${item.nickname}</h3>
+                        </div>
+                        <div class="card-body">
+                            ${item.foto ? `<img src="${item.foto}" alt="Bukti Analisis">` : ''}
+                            <p><strong>Jenis:</strong> ${item.jenis}</p>
+                            <p><strong>Analisis:</strong> ${item.analisis}</p>
+                        </div>
+                        <div class="card-footer">
+                            <span>Status: Terverifikasi Sistem</span>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += card;
             });
-        }
-
-        document.getElementById('analisis').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); simpanData(); }
+            
+            document.getElementById('totalLaporan').innerText = total;
         });
+
+        function filterPlayer() {
+            let input = document.getElementById('searchInput').value.toLowerCase();
+            let category = document.getElementById('categoryFilter').value;
+            let cards = document.getElementsByClassName('report-card');
+
+            for (let i = 0; i < cards.length; i++) {
+                let nickname = cards[i].getElementsByTagName('h3')[0].innerText.toLowerCase();
+                let cardCategory = cards[i].getAttribute('data-category');
+                let matchName = nickname.includes(input);
+                let matchCategory = (category === "all" || cardCategory === category);
+                cards[i].style.display = (matchName && matchCategory) ? "" : "none";
+            }
+        }
     </script>
 </body>
 </html>

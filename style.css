@@ -19,31 +19,80 @@ input { flex: 2; }
 select { flex: 1; cursor: pointer; }
 input:focus, select:focus { border-color: #ff4b2b; }
 
-/* REPORT CARD */
-.report-card { background: #1e1e1e; margin-bottom: 20px; border-radius: 8px; overflow: hidden; transition: 0.3s; border: 1px solid transparent; }
-.report-card:hover { transform: translateY(-5px); border-color: #ff4b2b; }
-.card-header { background: #2a2a2a; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-.card-body { padding: 20px; }
-.report-card img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333; cursor: pointer; transition: 0.3s; }
-.report-card img:hover { filter: brightness(1.2); }
+/* REPORT CARD - Versi Berwarna & Berdimensi */
+.report-card {
+    background: linear-gradient(145deg, #1e1e1e, #161616); /* Gradasi halus */
+    margin-bottom: 25px;
+    border-radius: 12px; /* Lebih membulat sedikit */
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid #333; /* Border default tipis */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); /* Bayangan agar kartu "terangkat" */
+}
+/* Update di style.css */
+.report-card img {
+    width: 100%;
+    height: 100px; /* <--- Ubah dari 180px ke 100px biar irit tempat */
+    
+    object-fit: cover;
+    object-position: center;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #333;
+    cursor: pointer;
+    transition: 0.3s;
+    
+    /* Tambahan opsional: efek hitam putih biar gak terlalu ramai */
+    filter: grayscale(0.5); 
+}
 
+.report-card img:hover {
+    filter: grayscale(0); /* Jadi berwarna pas kursor nempel */
+    height: 120px; /* Sedikit membesar pas di-hover biar interaktif */
+}
+
+.card-body p {
+    margin-bottom: 8px;
+}
+
+/* Kotak khusus untuk bagian Analisis */
+.card-body p:last-child {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 6px;
+    border-left: 3px solid #ff4b2b; /* Garis aksen di samping teks analisis */
+    font-style: italic;
+    color: #bbb;
+}
+
+/* Efek saat kartu di-hover */
+.report-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    border-color: #ff4b2b; /* Border berubah jadi merah orange saat disentuh */
+    box-shadow: 0 15px 30px rgba(255, 75, 43, 0.2); /* Cahaya merah tipis di bawah kartu */
+}
 /* TAGS */
 .danger-tag { background: #ff4b2b; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; color: white; }
 .warning-tag { background: #ffb400; color: black; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
 
-/* INVESTIGATOR MODAL */
+/* CSS untuk Modal (Layar Hitam) */
 #imageModal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.95);
-    z-index: 9999;
+    display: none;       /* WAJIB: Biar gak muncul sebelum diklik */
+    position: fixed;     /* WAJIB: Biar melayang menutupi seluruh layar */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95); /* Hitam transparan */
+    z-index: 9999;       /* Biar paling depan mengalahkan kartu laporan */
+    
+    /* Supaya konten di dalamnya (gambar) ada di tengah */
     justify-content: center;
     align-items: center;
-    overflow: hidden;
+    overflow: hidden; 
 }
 
+/* CSS untuk Gambar di dalam Modal */
 #imageModal img {
     max-width: 90%;
     max-height: 90%;
@@ -52,12 +101,28 @@ input:focus, select:focus { border-color: #ff4b2b; }
     box-shadow: 0 0 30px rgba(255, 75, 43, 0.5);
     transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     cursor: zoom-in;
+    
+    /* Pastikan posisi awalnya normal */
     transform: scale(1);
+    transform-origin: center;
 }
 
+/* Efek pas dizoom */
 #imageModal img.zoomed {
     transform: scale(2.5);
     cursor: zoom-out;
+}
+
+/* Warna khusus untuk Header Cheat (Merah) */
+.report-card[data-category="cheat"] .card-header {
+    background: linear-gradient(to right, #2a2a2a, #441010); /* Gradasi merah gelap */
+    border-bottom: 1px solid #ff4b2b;
+}
+
+/* Warna khusus untuk Header Makro (Kuning/Orange) */
+.report-card[data-category="makro"] .card-header {
+    background: linear-gradient(to right, #2a2a2a, #443310); /* Gradasi kuning gelap */
+    border-bottom: 1px solid #ffb400;
 }
 
 /* CUSTOM SCROLLBAR */

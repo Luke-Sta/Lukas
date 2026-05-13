@@ -24,14 +24,19 @@
     <div class="container">
         <div class="form-admin">
             <h2 style="text-align: center; margin-bottom: 20px;">Input Data Cheater Baru</h2>
-            <input type="text" id="nick" placeholder="Nickname Cheater...">
-            <input type="text" id="jenis" placeholder="Jenis (Contoh: No Recoil, Wallhack)">
-            <select id="kat">
-                <option value="makro">Makro (Ring 3)</option>
-                <option value="cheat">Cheat (External/Kernel)</option>
+            
+            <input type="text" id="nick" placeholder="Nickname Cheater..." onkeydown="if(event.key === 'Enter') document.getElementById('jenis').focus()">
+            
+            <input type="text" id="jenis" placeholder="Jenis (Contoh: No Recoil, Wallhack)" onkeydown="if(event.key === 'Enter') document.getElementById('kategori').focus()">
+            
+            <select id="kategori" onkeydown="if(event.key === 'Enter') document.getElementById('linkFoto').focus()">
+                <option value="makro">Makro</option>
+                <option value="cheat">Cheat</option>
             </select>
-            <input type="text" id="linkFoto" placeholder="Link Foto Bukti (Contoh: https://i.ibb.co/xxx.png)">
-            <textarea id="analisis" placeholder="Tuliskan hasil analisis sistem di sini..."></textarea>
+            
+            <input type="text" id="linkFoto" placeholder="Link Foto Bukti (ImgBB)" onkeydown="if(event.key === 'Enter') document.getElementById('analisis').focus()">
+            
+            <textarea id="analisis" placeholder="Hasil Analisis..." onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); simpanData(); }"></textarea>
             
             <button class="btn-kirim" onclick="simpanData()">KIRIM KE CLOUD DATABASE</button>
             <button class="btn-logout" onclick="logout()">LOGOUT SYSTEM</button>
@@ -59,6 +64,7 @@
         const database = firebase.database();
         const auth = firebase.auth();
 
+        // Proteksi Halaman
         auth.onAuthStateChanged((user) => { if (!user) window.location.href = "login.html"; });
 
         function logout() { auth.signOut().then(() => { window.location.href = "login.html"; }); }
@@ -66,28 +72,35 @@
         function simpanData() {
             const nickname = document.getElementById('nick').value;
             const jenis = document.getElementById('jenis').value;
-            const kategori = document.getElementById('kat').value;
+            const kategori = document.getElementById('kategori').value; // SUDAH DIPERBAIKI
             const linkFoto = document.getElementById('linkFoto').value;
             const analisis = document.getElementById('analisis').value;
 
-            if(nickname == "" || jenis == "") { alert("Woi Kas, nick sama jenis jangan kosong!"); return; }
+            if(nickname == "" || jenis == "") { 
+                alert("Woi Kas, nick sama jenis jangan kosong!"); 
+                return; 
+            }
 
             const databaseRef = database.ref('laporan');
             databaseRef.push().set({
-                nickname: nickname, jenis: jenis, kategori: kategori,
-                foto: linkFoto, analisis: analisis, timestamp: Date.now()
+                nickname: nickname, 
+                jenis: jenis, 
+                kategori: kategori,
+                foto: linkFoto, 
+                analisis: analisis, 
+                timestamp: Date.now()
             }).then(() => {
                 alert("Data & Foto berhasil sinkron ke Cloud!");
+                // Clear Form
                 document.getElementById('nick').value = "";
                 document.getElementById('jenis').value = "";
                 document.getElementById('linkFoto').value = "";
                 document.getElementById('analisis').value = "";
+                document.getElementById('nick').focus();
+            }).catch((err) => {
+                alert("Error: " + err.message);
             });
         }
-
-        document.getElementById('analisis').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); simpanData(); }
-        });
     </script>
 </body>
 </html>

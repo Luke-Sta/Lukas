@@ -3,195 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PB FairPlay Analyst | Database Hunter</title>
+    <title>Admin Panel | PB Hunter</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .form-admin { background: #1e1e1e; padding: 30px; border-radius: 12px; margin-top: 50px; border: 1px solid #333; }
+        input, select, textarea { 
+            width: 100%; margin: 10px 0; padding: 12px; 
+            background: #2a2a2a; border: 1px solid #444; 
+            color: white; border-radius: 8px; outline: none; transition: 0.3s;
+        }
+        input:focus, textarea:focus { border-color: #ff4b2b; }
+        .btn-kirim { background: #ff4b2b; color: white; padding: 15px; width: 100%; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .btn-kirim:hover { background: #ff310d; transform: translateY(-2px); box-shadow: 0 0 20px rgba(255, 75, 43, 0.7); }
+        .btn-logout { background: #444; color: white; padding: 15px; width: 100%; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn-logout:hover { background: #666; transform: scale(1.02); }
+        textarea { resize: none; overflow-y: auto; height: 120px; }
+    </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>PORTAL <span class="highlight">HUNTER</span></h1>
-            <p>Database Analisis Sistem & Perilaku Tidak Wajar</p>
-        </div>
-    </header>
-
-    <main class="container">
-        <section class="stats">
-            <div class="stat-card">
-                <h3>Total Laporan</h3>
-                <p class="count">3</p>
-            </div>
-            <div class="stat-card">
-                <h3>Sistem Terdeteksi</h3>
-                <p class="count">Multi-Sistem</p>
-            </div>
-        </section>
-        
-        <div class="controls-container">
-            <div class="search-container">
-                <input type="text" id="searchInput" placeholder="Cari Nickname Cheater..." onkeyup="filterPlayer()">
-            </div>
-
-            <div class="filter-container">
-                <select id="categoryFilter" onchange="filterPlayer()">
-                    <option value="all">Semua Kategori</option>
-                    <option value="makro">Makro (Ring 3)</option>
-                    <option value="cheat">Cheat (External/Kernel)</option>
-                </select>
-            </div>
-        </div>
-
-        <section class="database">
-            <h2>Daftar Analisis Terbaru</h2>
-
-            <div class="report-card" data-category="cheat">
-                <div class="card-header">
-                    <span class="danger-tag">HIGH RISK</span>
-                    <h3>Nickname: T77GHOIB_477</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Jenis:</strong> Menyelam</p>
-                    <p><strong>Analisis:</strong> Menggunakan Jenis VIP yang memiliki bypass setara Cheat Blocker. Mengaktifkan fitur up/down yang memungkinkan pemain menembus sistem lantai game.</p>
-                </div>
-                <div class="card-footer">
-                    <span>Status: Monitoring</span>
-                </div>
-            </div>
+    <div class="container">
+        <div class="form-admin">
+            <h2 style="text-align: center; margin-bottom: 20px;">Input Data Cheater Baru</h2>
+            <input type="text" id="nick" placeholder="Nickname Cheater...">
+            <input type="text" id="jenis" placeholder="Jenis (Contoh: No Recoil, Wallhack)">
+            <select id="kat">
+                <option value="makro">Makro (Ring 3)</option>
+                <option value="cheat">Cheat (External/Kernel)</option>
+            </select>
+            <input type="text" id="linkFoto" placeholder="Link Foto Bukti (Contoh: https://i.ibb.co/xxx.png)">
+            <textarea id="analisis" placeholder="Tuliskan hasil analisis sistem di sini..."></textarea>
             
-            <div class="report-card" data-category="makro">
-                <div class="card-header">
-                    <span class="danger-tag">HIGH RISK</span>
-                    <h3>Nickname: T77GHOIB_432</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Jenis:</strong> Macro SG / Quick Change</p>
-                    <p><strong>Analisis:</strong> Terdeteksi menggunakan virtual input dengan delay konstan 0.01ms. Terindikasi script Python/AutoHotkey.</p>
-                </div>
-                <div class="card-footer">
-                    <span>Status: Monitoring</span>
-                </div>
-            </div>
+            <button class="btn-kirim" onclick="simpanData()">KIRIM KE CLOUD DATABASE</button>
+            <button class="btn-logout" onclick="logout()">LOGOUT SYSTEM</button>
+        </div>
+        <p style="text-align: center; margin-top: 20px;"><a href="index.html" style="color: #888;">Kembali ke Dashboard Utama</a></p>
+    </div>
 
-            <div class="report-card" data-category="cheat">
-                <div class="card-header">
-                    <span class="warning-tag">MEDIUM</span>
-                    <h3>Nickname: AimBotLover</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Jenis:</strong> No Recoil</p>
-                    <p><strong>Analisis:</strong> Kursor bergerak secara otomatis melawan arah hentakan senjata secara vertikal (Y-Axis).</p>
-                </div>
-                <div class="card-footer">
-                    <span>Status: Investigasi</span>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2026 Lukas P. Nainggolan | Proyek Analisis Bisnis Digital</p>
-    </footer>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
 
     <script>
-    function filterPlayer() {
-        let input = document.getElementById('searchInput').value.toLowerCase();
-        let category = document.getElementById('categoryFilter').value;
-        let cards = document.getElementsByClassName('report-card');
+        const firebaseConfig = {
+            apiKey: "AIzaSyAtwMIddFawOjoeaxxjOwnbJF_6Z-h91T4",
+            authDomain: "pb-hunter-lukas.firebaseapp.com",
+            projectId: "pb-hunter-lukas",
+            storageBucket: "pb-hunter-lukas.firebasestorage.app",
+            messagingSenderId: "879661325305",
+            appId: "1:879661325305:web:ff3288dd77095753b13b28",
+            measurementId: "G-W2965QYNWM",
+            databaseURL: "https://pb-hunter-lukas-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
 
-        for (let i = 0; i < cards.length; i++) {
-            let nickname = cards[i].getElementsByTagName('h3')[0].innerText.toLowerCase();
-            let cardCategory = cards[i].getAttribute('data-category');
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
 
-            let matchName = nickname.includes(input);
-            let matchCategory = (category === "all" || cardCategory === category);
+        auth.onAuthStateChanged((user) => { if (!user) window.location.href = "login.html"; });
 
-            if (matchName && matchCategory) {
-                cards[i].style.display = "";
-            } else {
-                cards[i].style.display = "none";
-            }
+        function logout() { auth.signOut().then(() => { window.location.href = "login.html"; }); }
+
+        function simpanData() {
+            const nickname = document.getElementById('nick').value;
+            const jenis = document.getElementById('jenis').value;
+            const kategori = document.getElementById('kat').value;
+            const linkFoto = document.getElementById('linkFoto').value;
+            const analisis = document.getElementById('analisis').value;
+
+            if(nickname == "" || jenis == "") { alert("Woi Kas, nick sama jenis jangan kosong!"); return; }
+
+            const databaseRef = database.ref('laporan');
+            databaseRef.push().set({
+                nickname: nickname, jenis: jenis, kategori: kategori,
+                foto: linkFoto, analisis: analisis, timestamp: Date.now()
+            }).then(() => {
+                alert("Data & Foto berhasil sinkron ke Cloud!");
+                document.getElementById('nick').value = "";
+                document.getElementById('jenis').value = "";
+                document.getElementById('linkFoto').value = "";
+                document.getElementById('analisis').value = "";
+            });
         }
-    }
+
+        document.getElementById('analisis').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); simpanData(); }
+        });
     </script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-
-<script>
-    // Config asli Lukas
-    const firebaseConfig = {
-        apiKey: "AIzaSyAtwMIddFawOjoeaxxjOwnbJF_6Z-h91T4",
-        authDomain: "pb-hunter-lukas.firebaseapp.com",
-        projectId: "pb-hunter-lukas",
-        storageBucket: "pb-hunter-lukas.firebasestorage.app",
-        messagingSenderId: "879661325305",
-        appId: "1:879661325305:web:ff3288dd77095753b13b28",
-        measurementId: "G-W2965QYNWM",
-        databaseURL: "https://pb-hunter-lukas-default-rtdb.asia-southeast1.firebasedatabase.app"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-
-    // Fungsi Narik Data dari Cloud
-    const databaseRef = database.ref('laporan');
-    databaseRef.on('value', (snapshot) => {
-        const data = snapshot.val();
-        const container = document.querySelector('.database');
-        
-        // Bersihkan daftar lama (kecuali judul H2)
-        container.innerHTML = '<h2>Daftar Analisis Terbaru</h2>';
-
-        // Update jumlah laporan di kotak statistik
-        let total = 0;
-
-        for (let id in data) {
-            total++;
-            const item = data[id];
-            
-            // Bikin kartu (card) otomatis buat tiap data di Firebase
-            const card = `
-                <div class="report-card" data-category="${item.kategori}">
-                    <div class="card-header">
-                        <span class="${item.kategori === 'cheat' ? 'danger-tag' : 'warning-tag'}">
-                            ${item.kategori.toUpperCase()}
-                        </span>
-                        <h3>Nickname: ${item.nickname}</h3>
-                    </div>
-                    <div class="card-body">
-                        <p><strong>Jenis:</strong> ${item.jenis}</p>
-                        <p><strong>Analisis:</strong> ${item.analisis}</p>
-                    </div>
-                    <div class="card-footer">
-                        <span>Status: Terverifikasi Sistem</span>
-                    </div>
-                </div>
-            `;
-            container.innerHTML += card;
-        }
-        
-        // Update angka di Stat Card
-        document.querySelector('.stats .stat-card:first-child .count').innerText = total;
-    });
-
-    // Fungsi Filter & Search (Tetap ada)
-    function filterPlayer() {
-        let input = document.getElementById('searchInput').value.toLowerCase();
-        let category = document.getElementById('categoryFilter').value;
-        let cards = document.getElementsByClassName('report-card');
-
-        for (let i = 0; i < cards.length; i++) {
-            let nickname = cards[i].getElementsByTagName('h3')[0].innerText.toLowerCase();
-            let cardCategory = cards[i].getAttribute('data-category');
-
-            let matchName = nickname.includes(input);
-            let matchCategory = (category === "all" || cardCategory === category);
-
-            if (matchName && matchCategory) {
-                cards[i].style.display = "";
-            } else {
-                cards[i].style.display = "none";
-            }
-        }
-    }
-</script>
 </body>
 </html>

@@ -5,18 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PB FairPlay Analyst | Database Hunter</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .report-card img {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #333;
-            display: block;
-            object-fit: cover;
-            max-height: 250px;
-        }
-    </style>
 </head>
 <body>
     <header>
@@ -40,9 +28,8 @@
         
         <div class="controls-container">
             <div class="search-container">
-                <input type="text" id="searchInput" placeholder="Cari Nickname Cheater..." onkeyup="filterPlayer()">
+                <input type="text" id="searchInput" placeholder="Cari Nickname..." onkeyup="filterPlayer()">
             </div>
-
             <div class="filter-container">
                 <select id="categoryFilter" onchange="filterPlayer()">
                     <option value="all">Semua Kategori</option>
@@ -52,9 +39,12 @@
             </div>
         </div>
 
-        <div id="reportContainer" class="report-grid">
-            </div>
+        <div id="reportContainer" class="report-grid"></div>
     </main>
+
+    <div id="imageModal">
+        <img id="modalImg" src="" alt="Zoomed Evidence">
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
@@ -73,10 +63,13 @@
 
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImg');
 
+        // AMBIL DATA REAL-TIME
         database.ref('laporan').on('value', (snapshot) => {
             const container = document.getElementById('reportContainer');
-            container.innerHTML = ""; 
+            container.innerHTML = "";
             let total = 0;
 
             snapshot.forEach((childSnapshot) => {
@@ -92,7 +85,7 @@
                             <h3>Nickname: ${item.nickname}</h3>
                         </div>
                         <div class="card-body">
-                            ${item.foto ? `<img src="${item.foto}" alt="Bukti Analisis">` : ''}
+                            ${item.foto ? `<img src="${item.foto}" alt="Bukti" onclick="zoomImage('${item.foto}')">` : ''}
                             <p><strong>Jenis:</strong> ${item.jenis}</p>
                             <p><strong>Analisis:</strong> ${item.analisis}</p>
                         </div>
@@ -103,15 +96,36 @@
                 `;
                 container.innerHTML += card;
             });
-            
             document.getElementById('totalLaporan').innerText = total;
         });
+
+        // FUNGSI ZOOM GACOR
+        function zoomImage(src) {
+            modal.style.display = 'flex';
+            modalImg.src = src;
+            modalImg.classList.remove('zoomed');
+            modalImg.style.transformOrigin = 'center';
+        }
+
+        modalImg.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (!this.classList.contains('zoomed')) {
+                const rect = this.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                this.style.transformOrigin = `${x}% ${y}%`;
+                this.classList.add('zoomed');
+            } else {
+                this.classList.remove('zoomed');
+            }
+        });
+
+        modal.addEventListener('click', () => { modal.style.display = 'none'; });
 
         function filterPlayer() {
             let input = document.getElementById('searchInput').value.toLowerCase();
             let category = document.getElementById('categoryFilter').value;
             let cards = document.getElementsByClassName('report-card');
-
             for (let i = 0; i < cards.length; i++) {
                 let nickname = cards[i].getElementsByTagName('h3')[0].innerText.toLowerCase();
                 let cardCategory = cards[i].getAttribute('data-category');
